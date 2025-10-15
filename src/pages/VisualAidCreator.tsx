@@ -25,20 +25,40 @@ const VisualAidCreator = () => {
 
     setLoading(true);
     try {
-      // TODO: Integrate with image generation API (Gemini or other) via Lovable Cloud
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/visual-aid-creator`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ description }),
+        }
+      );
+
+      const data = await response.json();
       
-      // Placeholder - will be replaced with actual generated image
-      setGeneratedImage("https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop");
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate visual aid');
+      }
       
-      toast({
-        title: "Visual aid generated!",
-        description: "Your diagram is ready to use",
-      });
+      if (data.imageUrl) {
+        setGeneratedImage(data.imageUrl);
+        toast({
+          title: "Visual aid generated!",
+          description: "Your diagram is ready to use",
+        });
+      } else {
+        toast({
+          title: "Description generated",
+          description: data.message || "Use this description to draw the visual aid",
+        });
+      }
     } catch (error) {
+      console.error('Error:', error);
       toast({
         title: "Error generating visual aid",
-        description: "Please try again",
+        description: error instanceof Error ? error.message : "Please try again",
         variant: "destructive",
       });
     } finally {

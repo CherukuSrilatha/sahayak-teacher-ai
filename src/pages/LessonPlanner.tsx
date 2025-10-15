@@ -28,28 +28,34 @@ const LessonPlanner = () => {
 
     setLoading(true);
     try {
-      // TODO: Integrate with Gemini AI via Lovable Cloud
-      await new Promise(resolve => setTimeout(resolve, 2500));
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lesson-planner`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ subject, grades, topics }),
+        }
+      );
+
+      const data = await response.json();
       
-      setLessonPlan({
-        week: "Week 1",
-        days: [
-          { day: "Monday", activity: "Introduction to topic with story", duration: "45 min" },
-          { day: "Tuesday", activity: "Hands-on group activity", duration: "60 min" },
-          { day: "Wednesday", activity: "Individual practice worksheets", duration: "45 min" },
-          { day: "Thursday", activity: "Review and questions", duration: "30 min" },
-          { day: "Friday", activity: "Assessment and feedback", duration: "45 min" },
-        ]
-      });
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create lesson plan');
+      }
+      
+      setLessonPlan(data.lessonPlan);
       
       toast({
         title: "Lesson plan created!",
         description: "Your weekly plan is ready",
       });
     } catch (error) {
+      console.error('Error:', error);
       toast({
         title: "Error creating lesson plan",
-        description: "Please try again",
+        description: error instanceof Error ? error.message : "Please try again",
         variant: "destructive",
       });
     } finally {

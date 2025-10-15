@@ -30,23 +30,45 @@ const WorksheetDifferentiator = () => {
 
     setLoading(true);
     try {
-      // TODO: Integrate with Gemini multimodal API via Lovable Cloud
-      await new Promise(resolve => setTimeout(resolve, 2500));
+      // Convert file to base64
+      const reader = new FileReader();
+      reader.readAsDataURL(selectedFile);
       
-      setWorksheets([
-        { grade: "Grade 1-2", difficulty: "Basic", description: "Simplified vocabulary and concepts" },
-        { grade: "Grade 3-4", difficulty: "Intermediate", description: "Standard textbook level" },
-        { grade: "Grade 5-6", difficulty: "Advanced", description: "Additional challenges and extensions" },
-      ]);
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+      });
+
+      const imageBase64 = await base64Promise;
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/worksheet-differentiator`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ imageBase64 }),
+        }
+      );
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate worksheets');
+      }
+      
+      setWorksheets(data.worksheets);
       
       toast({
         title: "Worksheets generated!",
-        description: "Created 3 differentiated versions",
+        description: `Created ${data.worksheets.length} differentiated versions`,
       });
     } catch (error) {
+      console.error('Error:', error);
       toast({
         title: "Error generating worksheets",
-        description: "Please try again",
+        description: error instanceof Error ? error.message : "Please try again",
         variant: "destructive",
       });
     } finally {

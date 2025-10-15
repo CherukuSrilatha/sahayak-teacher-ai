@@ -27,19 +27,34 @@ const QuickExplainer = () => {
 
     setLoading(true);
     try {
-      // TODO: Integrate with Gemini AI via Lovable Cloud
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/quick-explainer`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ question, language }),
+        }
+      );
+
+      const data = await response.json();
       
-      setExplanation(`[Explanation in ${language}]\n\nExample answer: The sky appears blue because of a phenomenon called Rayleigh scattering. When sunlight enters Earth's atmosphere, it collides with gas molecules. Blue light has a shorter wavelength and gets scattered more than other colors, making the sky look blue to our eyes.\n\nThink of it like this: Imagine throwing different sized balls through a forest of trees. The smaller balls (blue light) bounce around more between the trees, while larger balls (red light) pass through more easily.`);
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate explanation');
+      }
+      
+      setExplanation(data.explanation);
       
       toast({
         title: "Explanation ready!",
         description: "Simple, accurate answer generated",
       });
     } catch (error) {
+      console.error('Error:', error);
       toast({
         title: "Error generating explanation",
-        description: "Please try again",
+        description: error instanceof Error ? error.message : "Please try again",
         variant: "destructive",
       });
     } finally {

@@ -1,1 +1,16 @@
 project_id = "rqdtcvvpybgjinoqwacw"
+
+[functions.content-generator]
+verify_jwt = false
+
+[functions.quick-explainer]
+verify_jwt = false
+
+[functions.lesson-planner]
+verify_jwt = false
+
+[functions.visual-aid-creator]
+verify_jwt = false
+
+[functions.worksheet-differentiator]
+verify_jwt = false

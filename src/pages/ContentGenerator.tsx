@@ -27,20 +27,34 @@ const ContentGenerator = () => {
 
     setLoading(true);
     try {
-      // TODO: Integrate with Gemini AI via Lovable Cloud
-      // Simulating API call for now
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/content-generator`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ prompt, language }),
+        }
+      );
+
+      const data = await response.json();
       
-      setGeneratedContent(`[Generated content will appear here based on your prompt in ${language}]\n\nExample: Once upon a time, in a small village in Maharashtra, there lived a farmer named Raju...`);
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate content');
+      }
+      
+      setGeneratedContent(data.generatedText);
       
       toast({
         title: "Content generated!",
         description: "Your localized content is ready",
       });
     } catch (error) {
+      console.error('Error:', error);
       toast({
         title: "Error generating content",
-        description: "Please try again",
+        description: error instanceof Error ? error.message : "Please try again",
         variant: "destructive",
       });
     } finally {
