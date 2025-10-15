@@ -13,24 +13,27 @@ serve(async (req) => {
 
   try {
     const { description } = await req.json();
-    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
-    if (!GEMINI_API_KEY) {
-      throw new Error('GEMINI_API_KEY not configured');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    console.log('Generating visual aid with Gemini:', description);
+    console.log('Generating visual aid with Lovable AI:', description);
 
-    // Use Gemini's image generation capability
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
+      'https://ai.gateway.lovable.dev/v1/chat/completions',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json' 
+        },
         body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: `Generate a simple, clear educational diagram or visual aid based on this description: ${description}
+          model: 'google/gemini-2.5-flash-image-preview',
+          messages: [{
+            role: 'user',
+            content: `Generate a simple, clear educational diagram or visual aid based on this description: ${description}
 
 The image should be:
 - Simple line drawing style, suitable for blackboard copying
@@ -39,11 +42,8 @@ The image should be:
 - Black and white or minimal colors
 
 Please generate an image that matches this description.`
-            }]
           }],
-          generationConfig: {
-            temperature: 0.4,
-          }
+          modalities: ['image', 'text']
         })
       }
     );
@@ -51,22 +51,21 @@ Please generate an image that matches this description.`
     const data = await response.json();
     
     if (!response.ok) {
-      console.error('Gemini API error:', data);
+      console.error('Lovable AI error:', data);
       throw new Error(data.error?.message || 'Failed to generate visual aid');
     }
 
     // Check if image was generated
-    if (data.candidates[0].content.parts[0].inlineData) {
-      const imageData = data.candidates[0].content.parts[0].inlineData;
-      const base64Image = `data:${imageData.mimeType};base64,${imageData.data}`;
+    if (data.choices?.[0]?.message?.images?.[0]?.image_url?.url) {
+      const imageUrl = data.choices[0].message.images[0].image_url.url;
       
       return new Response(
-        JSON.stringify({ imageUrl: base64Image }),
+        JSON.stringify({ imageUrl }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     } else {
       // Fallback: provide a text-based description
-      const textResponse = data.candidates[0].content.parts[0].text;
+      const textResponse = data.choices[0].message.content;
       return new Response(
         JSON.stringify({ 
           imageUrl: null,

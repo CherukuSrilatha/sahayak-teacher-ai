@@ -13,23 +13,27 @@ serve(async (req) => {
 
   try {
     const { subject, grades, topics } = await req.json();
-    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
-    if (!GEMINI_API_KEY) {
-      throw new Error('GEMINI_API_KEY not configured');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY not configured');
     }
 
     console.log('Generating lesson plan for:', subject, grades, topics);
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
+      'https://ai.gateway.lovable.dev/v1/chat/completions',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json' 
+        },
         body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: `You are an expert lesson planner for multi-grade classrooms in rural India. Create a detailed weekly lesson plan.
+          model: 'google/gemini-2.5-flash',
+          messages: [{
+            role: 'user',
+            content: `You are an expert lesson planner for multi-grade classrooms in rural India. Create a detailed weekly lesson plan.
 
 Subject: ${subject}
 Grade Levels: ${grades}
@@ -55,12 +59,7 @@ Format the response as JSON with this structure:
 }
 
 Provide ONLY the JSON, no additional text.`
-            }]
-          }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 2048,
-          }
+          }]
         })
       }
     );
@@ -68,11 +67,11 @@ Provide ONLY the JSON, no additional text.`
     const data = await response.json();
     
     if (!response.ok) {
-      console.error('Gemini API error:', data);
+      console.error('Lovable AI error:', data);
       throw new Error(data.error?.message || 'Failed to generate lesson plan');
     }
 
-    let lessonPlan = data.candidates[0].content.parts[0].text;
+    let lessonPlan = data.choices[0].message.content;
     
     // Extract JSON from markdown code blocks if present
     if (lessonPlan.includes('```json')) {

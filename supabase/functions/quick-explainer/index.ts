@@ -13,33 +13,32 @@ serve(async (req) => {
 
   try {
     const { question, language } = await req.json();
-    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
-    if (!GEMINI_API_KEY) {
-      throw new Error('GEMINI_API_KEY not configured');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY not configured');
     }
 
     console.log('Generating explanation for question:', question, 'in language:', language);
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
+      'https://ai.gateway.lovable.dev/v1/chat/completions',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json' 
+        },
         body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: `You are a helpful teaching assistant. Answer this student's question in ${language} in a simple, clear way that's easy for children to understand. Use analogies and examples from everyday life in rural India.
+          model: 'google/gemini-2.5-flash',
+          messages: [{
+            role: 'user',
+            content: `You are a helpful teaching assistant. Answer this student's question in ${language} in a simple, clear way that's easy for children to understand. Use analogies and examples from everyday life in rural India.
 
 Question: ${question}
 
 Provide a clear explanation with simple examples and analogies that students can relate to.`
-            }]
-          }],
-          generationConfig: {
-            temperature: 0.5,
-            maxOutputTokens: 1024,
-          }
+          }]
         })
       }
     );
@@ -47,11 +46,11 @@ Provide a clear explanation with simple examples and analogies that students can
     const data = await response.json();
     
     if (!response.ok) {
-      console.error('Gemini API error:', data);
+      console.error('Lovable AI error:', data);
       throw new Error(data.error?.message || 'Failed to generate explanation');
     }
 
-    const explanation = data.candidates[0].content.parts[0].text;
+    const explanation = data.choices[0].message.content;
 
     return new Response(
       JSON.stringify({ explanation }),

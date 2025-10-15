@@ -13,29 +13,29 @@ serve(async (req) => {
 
   try {
     const { imageBase64 } = await req.json();
-    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
-    if (!GEMINI_API_KEY) {
-      throw new Error('GEMINI_API_KEY not configured');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    console.log('Analyzing textbook page with Gemini vision');
-
-    // Remove data URL prefix if present
-    let base64Data = imageBase64;
-    if (imageBase64.includes('base64,')) {
-      base64Data = imageBase64.split('base64,')[1];
-    }
+    console.log('Analyzing textbook page with Lovable AI vision');
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
+      'https://ai.gateway.lovable.dev/v1/chat/completions',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json' 
+        },
         body: JSON.stringify({
-          contents: [{
-            parts: [
+          model: 'google/gemini-2.5-flash',
+          messages: [{
+            role: 'user',
+            content: [
               {
+                type: 'text',
                 text: `Analyze this textbook page and create 3 differentiated worksheet versions for different grade levels in a multi-grade classroom:
 
 1. Basic Level (Grades 1-2): Simplified vocabulary, basic concepts, visual aids
@@ -63,17 +63,13 @@ Format as JSON:
 Provide ONLY the JSON, no additional text.`
               },
               {
-                inlineData: {
-                  mimeType: "image/jpeg",
-                  data: base64Data
+                type: 'image_url',
+                image_url: {
+                  url: imageBase64
                 }
               }
             ]
-          }],
-          generationConfig: {
-            temperature: 0.5,
-            maxOutputTokens: 2048,
-          }
+          }]
         })
       }
     );
@@ -81,11 +77,11 @@ Provide ONLY the JSON, no additional text.`
     const data = await response.json();
     
     if (!response.ok) {
-      console.error('Gemini API error:', data);
+      console.error('Lovable AI error:', data);
       throw new Error(data.error?.message || 'Failed to analyze textbook page');
     }
 
-    let worksheetsData = data.candidates[0].content.parts[0].text;
+    let worksheetsData = data.choices[0].message.content;
     
     // Extract JSON from markdown code blocks if present
     if (worksheetsData.includes('```json')) {
