@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Lightbulb } from "lucide-react";
+import { ArrowLeft, Lightbulb, Copy, Download, Volume2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
@@ -135,8 +135,50 @@ const QuickExplainer = () => {
               <p className="text-foreground whitespace-pre-wrap">{explanation}</p>
             </div>
             <div className="mt-6 flex gap-3">
-              <Button variant="outline">Copy to Clipboard</Button>
-              <Button variant="outline">Read Aloud</Button>
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  navigator.clipboard.writeText(explanation);
+                  toast({
+                    title: "Copied!",
+                    description: "Explanation copied to clipboard",
+                  });
+                }}
+              >
+                <Copy className="h-4 w-4 mr-2" />
+                Copy to Clipboard
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const blob = new Blob([explanation], { type: 'text/plain' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `explanation-${Date.now()}.txt`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                  toast({
+                    title: "Downloaded!",
+                    description: "Explanation downloaded successfully",
+                  });
+                }}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Download
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  const utterance = new SpeechSynthesisUtterance(explanation);
+                  window.speechSynthesis.speak(utterance);
+                }}
+              >
+                <Volume2 className="h-4 w-4 mr-2" />
+                Read Aloud
+              </Button>
             </div>
           </Card>
         )}

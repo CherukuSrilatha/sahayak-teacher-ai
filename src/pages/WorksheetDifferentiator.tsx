@@ -2,12 +2,14 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, FileText, Upload } from "lucide-react";
+import { ArrowLeft, FileText, Upload, Download, Eye } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
 const WorksheetDifferentiator = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [language, setLanguage] = useState("English");
   const [loading, setLoading] = useState(false);
   const [worksheets, setWorksheets] = useState<any[]>([]);
   const { toast } = useToast();
@@ -48,7 +50,7 @@ const WorksheetDifferentiator = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ imageBase64 }),
+          body: JSON.stringify({ imageBase64, language }),
         }
       );
 
@@ -101,6 +103,23 @@ const WorksheetDifferentiator = () => {
         <Card className="p-6 mb-6 bg-gradient-card shadow-medium">
           <div className="space-y-6">
             <div>
+              <Label htmlFor="language" className="text-base font-semibold">Language</Label>
+              <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger id="language" className="mt-2">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="English">English</SelectItem>
+                  <SelectItem value="Hindi">Hindi (हिंदी)</SelectItem>
+                  <SelectItem value="Marathi">Marathi (मराठी)</SelectItem>
+                  <SelectItem value="Bengali">Bengali (বাংলা)</SelectItem>
+                  <SelectItem value="Tamil">Tamil (தமிழ்)</SelectItem>
+                  <SelectItem value="Telugu">Telugu (తెలుగు)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
               <Label htmlFor="file-upload" className="text-base font-semibold">Upload Textbook Page</Label>
               <p className="text-sm text-muted-foreground mb-3">
                 Upload a clear photo of your textbook page (JPG, PNG)
@@ -150,8 +169,42 @@ const WorksheetDifferentiator = () => {
                     <p className="text-sm text-foreground">{worksheet.description}</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" variant="outline">Preview</Button>
-                    <Button size="sm">Download</Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => {
+                        const content = `${worksheet.grade} - ${worksheet.difficulty}\n\n${worksheet.description}\n\nActivities:\n${worksheet.activities.map((a: string, i: number) => `${i + 1}. ${a}`).join('\n')}`;
+                        toast({
+                          title: "Preview",
+                          description: content,
+                        });
+                      }}
+                    >
+                      <Eye className="h-4 w-4 mr-1" />
+                      Preview
+                    </Button>
+                    <Button 
+                      size="sm"
+                      onClick={() => {
+                        const content = `${worksheet.grade} - ${worksheet.difficulty}\n\n${worksheet.description}\n\nActivities:\n${worksheet.activities.map((a: string, i: number) => `${i + 1}. ${a}`).join('\n')}`;
+                        const blob = new Blob([content], { type: 'text/plain' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `worksheet-${worksheet.grade}-${Date.now()}.txt`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        toast({
+                          title: "Downloaded!",
+                          description: "Worksheet downloaded successfully",
+                        });
+                      }}
+                    >
+                      <Download className="h-4 w-4 mr-1" />
+                      Download
+                    </Button>
                   </div>
                 </div>
               </Card>

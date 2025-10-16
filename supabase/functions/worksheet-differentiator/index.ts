@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { imageBase64 } = await req.json();
+    const { imageBase64, language = 'English' } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
@@ -36,17 +36,19 @@ serve(async (req) => {
             content: [
               {
                 type: 'text',
-                text: `Analyze this textbook page and create 3 differentiated worksheet versions for different grade levels in a multi-grade classroom:
+                text: `Analyze this textbook page and create 3 differentiated worksheet versions for different grade levels in a multi-grade classroom. 
+
+IMPORTANT: Generate ALL content in ${language} language ONLY. Do not mix languages.
 
 1. Basic Level (Grades 1-2): Simplified vocabulary, basic concepts, visual aids
 2. Intermediate Level (Grades 3-4): Standard concepts as shown in the textbook
 3. Advanced Level (Grades 5-6): Extended concepts, critical thinking questions
 
 For each level, provide:
-- Grade range
-- Difficulty level
-- Detailed description of adaptations
-- 3-5 specific questions or activities
+- Grade range (in ${language})
+- Difficulty level (in ${language})
+- Detailed description of adaptations (in ${language})
+- 3-5 specific questions or activities (in ${language})
 
 Format as JSON:
 {
@@ -54,8 +56,8 @@ Format as JSON:
     {
       "grade": "Grade 1-2",
       "difficulty": "Basic",
-      "description": "description",
-      "activities": ["activity1", "activity2", "activity3"]
+      "description": "description in ${language}",
+      "activities": ["activity1 in ${language}", "activity2 in ${language}", "activity3 in ${language}"]
     }
   ]
 }

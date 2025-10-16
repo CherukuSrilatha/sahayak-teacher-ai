@@ -14,3 +14,9 @@ verify_jwt = false
 
 [functions.worksheet-differentiator]
 verify_jwt = false
+
+[functions.reading-assessment]
+verify_jwt = false
+
+[functions.game-generator]
+verify_jwt = false

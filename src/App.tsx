@@ -10,6 +10,8 @@ import WorksheetDifferentiator from "./pages/WorksheetDifferentiator";
 import QuickExplainer from "./pages/QuickExplainer";
 import VisualAidCreator from "./pages/VisualAidCreator";
 import LessonPlanner from "./pages/LessonPlanner";
+import ReadingAssessment from "./pages/ReadingAssessment";
+import GameGenerator from "./pages/GameGenerator";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +28,8 @@ const App = () => (
           <Route path="/quick-explainer" element={<QuickExplainer />} />
           <Route path="/visual-aid-creator" element={<VisualAidCreator />} />
           <Route path="/lesson-planner" element={<LessonPlanner />} />
+          <Route path="/reading-assessment" element={<ReadingAssessment />} />
+          <Route path="/game-generator" element={<GameGenerator />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

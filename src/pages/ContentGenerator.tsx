@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft, Sparkles, Copy, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
@@ -135,8 +135,40 @@ const ContentGenerator = () => {
               <p className="text-foreground whitespace-pre-wrap">{generatedContent}</p>
             </div>
             <div className="mt-6 flex gap-3">
-              <Button variant="outline">Copy to Clipboard</Button>
-              <Button variant="outline">Download as PDF</Button>
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  navigator.clipboard.writeText(generatedContent);
+                  toast({
+                    title: "Copied!",
+                    description: "Content copied to clipboard",
+                  });
+                }}
+              >
+                <Copy className="h-4 w-4 mr-2" />
+                Copy to Clipboard
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const blob = new Blob([generatedContent], { type: 'text/plain' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `content-${Date.now()}.txt`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                  toast({
+                    title: "Downloaded!",
+                    description: "Content downloaded successfully",
+                  });
+                }}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Download
+              </Button>
             </div>
           </Card>
         )}

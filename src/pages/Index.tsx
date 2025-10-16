@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { BookOpen, FileText, Lightbulb, Image, Calendar, Sparkles } from "lucide-react";
+import { BookOpen, FileText, Lightbulb, Image, Calendar, Sparkles, Mic, Gamepad2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Index = () => {
@@ -39,6 +39,20 @@ const Index = () => {
       description: "AI-powered weekly planning to structure your teaching",
       href: "/lesson-planner",
       gradient: "from-secondary to-primary"
+    },
+    {
+      icon: Mic,
+      title: "Reading Assessment",
+      description: "Record students reading and get detailed performance reports",
+      href: "/reading-assessment",
+      gradient: "from-accent to-secondary"
+    },
+    {
+      icon: Gamepad2,
+      title: "Game Generator",
+      description: "Create engaging educational games instantly for any topic",
+      href: "/game-generator",
+      gradient: "from-primary to-secondary"
     }
   ];
 
@@ -82,7 +96,7 @@ const Index = () => {
               Your Teaching Toolkit
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Five powerful AI tools designed to save you time and enhance your students' learning experience
+              Seven powerful AI tools designed to save you time and enhance your students' learning experience
             </p>
           </div>
 
