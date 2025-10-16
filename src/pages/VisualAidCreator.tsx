@@ -135,9 +135,39 @@ const VisualAidCreator = () => {
               />
             </div>
             <div className="flex gap-3">
-              <Button variant="outline">Download Image</Button>
-              <Button variant="outline">Print</Button>
-              <Button variant="outline">Regenerate</Button>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  const link = document.createElement('a');
+                  link.href = generatedImage;
+                  link.download = `visual-aid-${Date.now()}.png`;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  toast({ title: "Downloaded!", description: "Image saved successfully" });
+                }}
+              >
+                Download Image
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  const printWindow = window.open('', '', 'width=800,height=600');
+                  if (printWindow) {
+                    printWindow.document.write(`<img src="${generatedImage}" style="max-width:100%" />`);
+                    printWindow.document.close();
+                    printWindow.print();
+                  }
+                }}
+              >
+                Print
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={handleGenerate}
+              >
+                Regenerate
+              </Button>
             </div>
           </Card>
         )}

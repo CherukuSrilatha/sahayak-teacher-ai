@@ -72,19 +72,10 @@ const Index = () => {
             Your AI Teaching Assistant for Multi-Grade Classrooms
           </p>
           
-          <p className="text-base md:text-lg text-white/80 text-center max-w-2xl mx-auto mb-10">
+          <p className="text-base md:text-lg text-white/80 text-center max-w-2xl mx-auto">
             Empowering teachers in low-resource environments with localized content, 
             differentiated materials, and instant educational support
           </p>
-          
-          <div className="flex justify-center gap-4">
-            <Button size="lg" className="bg-white text-primary hover:bg-white/90 shadow-elevated">
-              Get Started
-            </Button>
-            <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10">
-              Learn More
-            </Button>
-          </div>
         </div>
       </section>
 

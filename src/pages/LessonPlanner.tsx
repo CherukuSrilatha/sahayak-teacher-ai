@@ -147,10 +147,27 @@ const LessonPlanner = () => {
                 </Card>
               ))}
             </div>
-            <div className="mt-6 flex gap-3">
-              <Button variant="outline">Download PDF</Button>
-              <Button variant="outline">Edit Plan</Button>
-              <Button variant="outline">Save Template</Button>
+            <div className="mt-6">
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  const content = `${lessonPlan.week} Plan\n\n${lessonPlan.days.map((day: any) => 
+                    `${day.day}\n${day.activity}\nDuration: ${day.duration}\n`
+                  ).join('\n')}`;
+                  const blob = new Blob([content], { type: 'text/plain' });
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.download = `lesson-plan-${Date.now()}.txt`;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  URL.revokeObjectURL(url);
+                  toast({ title: "Downloaded!", description: "Lesson plan saved successfully" });
+                }}
+              >
+                Download Plan
+              </Button>
             </div>
           </Card>
         )}

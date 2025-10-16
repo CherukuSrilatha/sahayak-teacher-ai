@@ -36,7 +36,12 @@ const GameGenerator = () => {
         body: { topic, gradeLevel, gameType }
       });
 
-      if (error) throw error;
+      if (error) {
+        const errorMsg = error.message.includes('non-2xx') 
+          ? 'Service is currently busy with high demand. Please try again in a moment.'
+          : error.message;
+        throw new Error(errorMsg);
+      }
 
       setGeneratedGame(data.game);
       toast({
