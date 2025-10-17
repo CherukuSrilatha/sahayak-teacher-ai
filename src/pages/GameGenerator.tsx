@@ -169,23 +169,36 @@ const GameGenerator = () => {
                 <div className="bg-muted/30 p-4 rounded-lg space-y-3">
                   {gameType === 'quiz' && generatedGame.content.questions && Array.isArray(generatedGame.content.questions) && (
                     <div className="space-y-4">
-                      {generatedGame.content.questions.map((q: any, idx: number) => (
-                        <div key={idx} className="border-b pb-3 last:border-b-0">
-                          <p className="font-medium mb-2">{idx + 1}. {String(q.question || '')}</p>
-                          <div className="ml-4 space-y-1">
-                            {Array.isArray(q.options) && q.options.map((opt: any, i: number) => {
-                              const optionText = typeof opt === 'string' ? opt : String(opt);
-                              const correctAnswer = typeof q.correct_answer === 'string' ? q.correct_answer : String(q.correct_answer || '');
-                              const isCorrect = optionText === correctAnswer;
-                              return (
-                                <p key={i} className={isCorrect ? "text-green-600 font-medium" : "text-muted-foreground"}>
-                                  {String.fromCharCode(65 + i)}) {optionText} {isCorrect && "✓"}
-                                </p>
-                              );
-                            })}
+                      {generatedGame.content.questions.map((q: any, idx: number) => {
+                        const getTextValue = (val: any): string => {
+                          if (typeof val === 'string') return val;
+                          if (typeof val === 'object' && val !== null) {
+                            return val.text || val.value || val.label || JSON.stringify(val);
+                          }
+                          return String(val || '');
+                        };
+
+                        const question = getTextValue(q.question);
+                        const correctAnswer = getTextValue(q.correct_answer || q.correctAnswer || q.answer);
+                        
+                        return (
+                          <div key={idx} className="border-b pb-3 last:border-b-0">
+                            <p className="font-medium mb-2">{idx + 1}. {question}</p>
+                            <div className="ml-4 space-y-1">
+                              {Array.isArray(q.options) && q.options.map((opt: any, i: number) => {
+                                const optionText = getTextValue(opt);
+                                const isCorrect = optionText === correctAnswer || 
+                                                 (typeof opt === 'object' && opt !== null && opt.correct === true);
+                                return (
+                                  <p key={i} className={isCorrect ? "text-green-600 font-medium" : "text-muted-foreground"}>
+                                    {String.fromCharCode(65 + i)}) {optionText} {isCorrect && "✓"}
+                                  </p>
+                                );
+                              })}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
 
@@ -193,38 +206,52 @@ const GameGenerator = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <h4 className="font-medium mb-2">Column A</h4>
-                        {generatedGame.content.pairs.map((pair: any, idx: number) => (
-                          <p key={idx} className="text-sm mb-1">{idx + 1}. {String(pair.item1 || '')}</p>
-                        ))}
+                        {generatedGame.content.pairs.map((pair: any, idx: number) => {
+                          const item1 = typeof pair.item1 === 'string' ? pair.item1 : 
+                                       (typeof pair.item1 === 'object' ? (pair.item1?.text || pair.item1?.value || JSON.stringify(pair.item1)) : String(pair.item1 || ''));
+                          return <p key={idx} className="text-sm mb-1">{idx + 1}. {item1}</p>;
+                        })}
                       </div>
                       <div>
                         <h4 className="font-medium mb-2">Column B</h4>
-                        {generatedGame.content.pairs.map((pair: any, idx: number) => (
-                          <p key={idx} className="text-sm mb-1">{String.fromCharCode(65 + idx)}) {String(pair.item2 || '')}</p>
-                        ))}
+                        {generatedGame.content.pairs.map((pair: any, idx: number) => {
+                          const item2 = typeof pair.item2 === 'string' ? pair.item2 : 
+                                       (typeof pair.item2 === 'object' ? (pair.item2?.text || pair.item2?.value || JSON.stringify(pair.item2)) : String(pair.item2 || ''));
+                          return <p key={idx} className="text-sm mb-1">{String.fromCharCode(65 + idx)}) {item2}</p>;
+                        })}
                       </div>
                     </div>
                   )}
 
                   {gameType === 'word-search' && generatedGame.content.words && Array.isArray(generatedGame.content.words) && (
                     <div className="space-y-2">
-                      {generatedGame.content.words.map((word: any, idx: number) => (
-                        <div key={idx} className="border-b pb-2 last:border-b-0">
-                          <p className="font-medium">{String(word.word || '')}</p>
-                          <p className="text-sm text-muted-foreground">{String(word.hint || '')}</p>
-                        </div>
-                      ))}
+                      {generatedGame.content.words.map((word: any, idx: number) => {
+                        const wordText = typeof word === 'string' ? word : 
+                                        (typeof word === 'object' ? (word.word || word.text || word.value || JSON.stringify(word)) : String(word || ''));
+                        const hintText = typeof word === 'object' ? (word.hint || word.description || '') : '';
+                        return (
+                          <div key={idx} className="border-b pb-2 last:border-b-0">
+                            <p className="font-medium">{wordText}</p>
+                            {hintText && <p className="text-sm text-muted-foreground">{hintText}</p>}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
 
                   {gameType === 'fill-blanks' && generatedGame.content.sentences && Array.isArray(generatedGame.content.sentences) && (
                     <div className="space-y-3">
-                      {generatedGame.content.sentences.map((item: any, idx: number) => (
-                        <div key={idx} className="border-b pb-2 last:border-b-0">
-                          <p className="mb-1">{idx + 1}. {String(item.sentence || '')}</p>
-                          <p className="text-sm text-green-600">Answer: {String(item.answer || '')}</p>
-                        </div>
-                      ))}
+                      {generatedGame.content.sentences.map((item: any, idx: number) => {
+                        const sentence = typeof item === 'string' ? item : 
+                                        (typeof item === 'object' ? (item.sentence || item.text || JSON.stringify(item)) : String(item || ''));
+                        const answer = typeof item === 'object' ? (item.answer || item.blank || item.missing || '') : '';
+                        return (
+                          <div key={idx} className="border-b pb-2 last:border-b-0">
+                            <p className="mb-1">{idx + 1}. {sentence}</p>
+                            {answer && <p className="text-sm text-green-600">Answer: {answer}</p>}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
