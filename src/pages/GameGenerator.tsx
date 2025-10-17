@@ -166,8 +166,62 @@ const GameGenerator = () => {
 
               <div>
                 <h3 className="font-semibold mb-2">Game Content</h3>
-                <div className="bg-muted/30 p-4 rounded-lg">
-                  <pre className="whitespace-pre-wrap text-sm">{JSON.stringify(generatedGame.content, null, 2)}</pre>
+                <div className="bg-muted/30 p-4 rounded-lg space-y-3">
+                  {gameType === 'quiz' && generatedGame.content.questions && (
+                    <div className="space-y-4">
+                      {generatedGame.content.questions.map((q: any, idx: number) => (
+                        <div key={idx} className="border-b pb-3 last:border-b-0">
+                          <p className="font-medium mb-2">{idx + 1}. {q.question}</p>
+                          <div className="ml-4 space-y-1">
+                            {q.options.map((opt: string, i: number) => (
+                              <p key={i} className={opt === q.correct_answer ? "text-green-600 font-medium" : "text-muted-foreground"}>
+                                {String.fromCharCode(65 + i)}) {opt} {opt === q.correct_answer && "✓"}
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {gameType === 'matching' && generatedGame.content.pairs && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="font-medium mb-2">Column A</h4>
+                        {generatedGame.content.pairs.map((pair: any, idx: number) => (
+                          <p key={idx} className="text-sm mb-1">{idx + 1}. {pair.item1}</p>
+                        ))}
+                      </div>
+                      <div>
+                        <h4 className="font-medium mb-2">Column B</h4>
+                        {generatedGame.content.pairs.map((pair: any, idx: number) => (
+                          <p key={idx} className="text-sm mb-1">{String.fromCharCode(65 + idx)}) {pair.item2}</p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {gameType === 'word-search' && generatedGame.content.words && (
+                    <div className="space-y-2">
+                      {generatedGame.content.words.map((word: any, idx: number) => (
+                        <div key={idx} className="border-b pb-2 last:border-b-0">
+                          <p className="font-medium">{word.word}</p>
+                          <p className="text-sm text-muted-foreground">{word.hint}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {gameType === 'fill-blanks' && generatedGame.content.sentences && (
+                    <div className="space-y-3">
+                      {generatedGame.content.sentences.map((item: any, idx: number) => (
+                        <div key={idx} className="border-b pb-2 last:border-b-0">
+                          <p className="mb-1">{idx + 1}. {item.sentence}</p>
+                          <p className="text-sm text-green-600">Answer: {item.answer}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

@@ -13,6 +13,7 @@ const QuickExplainer = () => {
   const [language, setLanguage] = useState("english");
   const [loading, setLoading] = useState(false);
   const [explanation, setExplanation] = useState("");
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const { toast } = useToast();
 
   const handleAsk = async () => {
@@ -172,12 +173,19 @@ const QuickExplainer = () => {
               <Button 
                 variant="outline"
                 onClick={() => {
-                  const utterance = new SpeechSynthesisUtterance(explanation);
-                  window.speechSynthesis.speak(utterance);
+                  if (isSpeaking) {
+                    window.speechSynthesis.cancel();
+                    setIsSpeaking(false);
+                  } else {
+                    const utterance = new SpeechSynthesisUtterance(explanation);
+                    utterance.onend = () => setIsSpeaking(false);
+                    window.speechSynthesis.speak(utterance);
+                    setIsSpeaking(true);
+                  }
                 }}
               >
                 <Volume2 className="h-4 w-4 mr-2" />
-                Read Aloud
+                {isSpeaking ? "Stop Reading" : "Read Aloud"}
               </Button>
             </div>
           </Card>

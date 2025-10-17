@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Mic, Square, Download, FileText } from "lucide-react";
+import { ArrowLeft, Mic, Square, Download, FileText, Volume2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const ReadingAssessment = () => {
@@ -21,6 +21,7 @@ const ReadingAssessment = () => {
     overall_feedback: string;
   } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const { toast } = useToast();
@@ -213,10 +214,34 @@ ${report.overall_feedback}`;
           <Card className="p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-semibold">Assessment Report</h2>
-              <Button onClick={downloadReport} variant="outline">
-                <Download className="h-4 w-4 mr-2" />
-                Download Report
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => {
+                    if (isSpeaking) {
+                      window.speechSynthesis.cancel();
+                      setIsSpeaking(false);
+                    } else {
+                      const reportText = `Fluency Score: ${report.fluency_score} out of 10. 
+                        Accuracy Analysis: ${report.accuracy_analysis}. 
+                        Mistakes: ${report.mistakes.join('. ')}. 
+                        Suggestions: ${report.suggestions.join('. ')}. 
+                        Overall Feedback: ${report.overall_feedback}`;
+                      const utterance = new SpeechSynthesisUtterance(reportText);
+                      utterance.onend = () => setIsSpeaking(false);
+                      window.speechSynthesis.speak(utterance);
+                      setIsSpeaking(true);
+                    }
+                  }}
+                  variant="outline"
+                >
+                  <Volume2 className="h-4 w-4 mr-2" />
+                  {isSpeaking ? "Stop Reading" : "Read Report"}
+                </Button>
+                <Button onClick={downloadReport} variant="outline">
+                  <Download className="h-4 w-4 mr-2" />
+                  Download Report
+                </Button>
+              </div>
             </div>
 
             <div className="space-y-6">

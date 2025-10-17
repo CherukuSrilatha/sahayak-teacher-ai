@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 const ContentGenerator = () => {
   const [prompt, setPrompt] = useState("");
   const [language, setLanguage] = useState("english");
+  const [contentLength, setContentLength] = useState("medium");
   const [loading, setLoading] = useState(false);
   const [generatedContent, setGeneratedContent] = useState("");
   const { toast } = useToast();
@@ -34,7 +35,7 @@ const ContentGenerator = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ prompt, language }),
+          body: JSON.stringify({ prompt, language, contentLength }),
         }
       );
 
@@ -99,6 +100,21 @@ const ContentGenerator = () => {
                   <SelectItem value="bengali">Bengali (বাংলা)</SelectItem>
                   <SelectItem value="tamil">Tamil (தமிழ்)</SelectItem>
                   <SelectItem value="telugu">Telugu (తెలుగు)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="contentLength" className="text-base font-semibold">Content Length</Label>
+              <Select value={contentLength} onValueChange={setContentLength}>
+                <SelectTrigger id="contentLength" className="mt-2">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="very-short">Very Short (1-2 paragraphs)</SelectItem>
+                  <SelectItem value="short">Short (3-4 paragraphs)</SelectItem>
+                  <SelectItem value="medium">Medium (5-7 paragraphs)</SelectItem>
+                  <SelectItem value="long">Long (8-10 paragraphs)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

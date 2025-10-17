@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, language } = await req.json();
+    const { prompt, language, contentLength } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
@@ -20,6 +20,13 @@ serve(async (req) => {
     }
 
     console.log('Generating content with Lovable AI for language:', language);
+
+    const lengthInstructions = {
+      'very-short': 'Keep it very brief - just 1-2 short paragraphs.',
+      'short': 'Keep it short and concise - 3-4 paragraphs.',
+      'medium': 'Provide a moderate amount of detail - 5-7 paragraphs.',
+      'long': 'Provide comprehensive detail - 8-10 paragraphs.'
+    };
 
     const response = await fetch(
       'https://ai.gateway.lovable.dev/v1/chat/completions',
@@ -36,6 +43,8 @@ serve(async (req) => {
             content: `You are a helpful teaching assistant for teachers in India. Generate educational content in ${language}. 
               
 Request: ${prompt}
+
+Length requirement: ${lengthInstructions[contentLength as keyof typeof lengthInstructions] || lengthInstructions.medium}
 
 Please provide clear, culturally relevant, and engaging content suitable for students in rural Indian schools.`
           }]
