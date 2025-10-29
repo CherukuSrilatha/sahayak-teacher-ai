@@ -52,7 +52,15 @@ Please generate an image that matches this description.`
     
     if (!response.ok) {
       console.error('Lovable AI error:', data);
-      throw new Error(data.error?.message || 'Failed to generate visual aid');
+      
+      if (response.status === 402) {
+        throw new Error('AI credits exhausted. Please add credits to your Lovable workspace in Settings → Workspace → Usage.');
+      }
+      if (response.status === 429) {
+        throw new Error('Too many requests. Please wait a moment and try again.');
+      }
+      
+      throw new Error(data.error?.message || data.message || 'Failed to generate visual aid');
     }
 
     // Check if image was generated

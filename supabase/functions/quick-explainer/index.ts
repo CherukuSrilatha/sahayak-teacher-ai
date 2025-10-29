@@ -47,7 +47,15 @@ Provide a clear explanation with simple examples and analogies that students can
     
     if (!response.ok) {
       console.error('Lovable AI error:', data);
-      throw new Error(data.error?.message || 'Failed to generate explanation');
+      
+      if (response.status === 402) {
+        throw new Error('AI credits exhausted. Please add credits to your Lovable workspace in Settings → Workspace → Usage.');
+      }
+      if (response.status === 429) {
+        throw new Error('Too many requests. Please wait a moment and try again.');
+      }
+      
+      throw new Error(data.error?.message || data.message || 'Failed to generate explanation');
     }
 
     const explanation = data.choices[0].message.content;

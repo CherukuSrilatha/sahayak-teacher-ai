@@ -44,7 +44,15 @@ serve(async (req) => {
     
     if (!transcriptionResponse.ok) {
       console.error('Transcription error:', transcriptionData);
-      throw new Error(transcriptionData.error?.message || 'Failed to transcribe audio');
+      
+      if (transcriptionResponse.status === 402) {
+        throw new Error('AI credits exhausted. Please add credits to your Lovable workspace in Settings → Workspace → Usage.');
+      }
+      if (transcriptionResponse.status === 429) {
+        throw new Error('Too many requests. Please wait a moment and try again.');
+      }
+      
+      throw new Error(transcriptionData.error?.message || transcriptionData.message || 'Failed to transcribe audio');
     }
 
     const transcription = transcriptionData.choices[0].message.content;
@@ -91,7 +99,15 @@ Provide ONLY the JSON, no additional text.`
     
     if (!analysisResponse.ok) {
       console.error('Analysis error:', analysisData);
-      throw new Error(analysisData.error?.message || 'Failed to analyze reading');
+      
+      if (analysisResponse.status === 402) {
+        throw new Error('AI credits exhausted. Please add credits to your Lovable workspace in Settings → Workspace → Usage.');
+      }
+      if (analysisResponse.status === 429) {
+        throw new Error('Too many requests. Please wait a moment and try again.');
+      }
+      
+      throw new Error(analysisData.error?.message || analysisData.message || 'Failed to analyze reading');
     }
 
     let reportText = analysisData.choices[0].message.content;
